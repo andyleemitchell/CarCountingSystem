@@ -1,25 +1,17 @@
 import torch
 import cv2
 import numpy as np
-from LineCounter import Point, LineZone, LineZoneAnnotator
-from deep_sort_realtime.deepsort_tracker import DeepSort
 
-# Obtaining a list of the YOLOv5 classes from txt file
-class_path = "YOLOv5Classes.txt"
-classes = []
-with open(class_path, "r") as file:
-    for class_name in file.readlines():
-        class_name = class_name.strip()
-        classes.append(class_name)
+# load YOLOv5 model
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
 
-# Vehicle objects to count
-allowed_objects = ["car", "motorcycle", "bus", "truck"]
+# getting a list of the objects that YOLO can detect
+CLASS_NAMES = model.model.names
 
-# YOLOv5 Model
-# model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-model = torch.hub.load(r'C:\Users\ultro\.cache\torch\hub\ultralytics_yolov5_master', 'yolov5s', source='local')
+# creating an array of objects of interest used to filter object detections
+ALLOWED_OBJECTS = ["car", "motorcycle", "bus", "truck"]
 
-# Loading Video File
+# Loading Video File - Insert path location to Video File
 cap = cv2.VideoCapture("TestVideo3_Recorded.mp4")
 
 while True:
@@ -40,12 +32,14 @@ while True:
     # Filtering detections
     detectionsList = []  # list of allowed detected objects in the form ([x,y,w,h], score, class)
     for (class_id, score, box) in zip(class_ids, confidence, boxes):
-        class_name = classes[class_id]
+        class_name = CLASS_NAMES[class_id]
+        
+        # checking is the object detection is an object of interest
         if class_name in allowed_objects:
             (x1, y1, x2, y2) = box
-            detectionsList.append(([x1, y1, x2 - x1, y2 - y1], score, classes[class_id]))
+            detectionsList.append(([x1, y1, x2 - x1, y2 - y1], score, CLASS_NAMES[class_id]))
 
-            text = str(class_name + ": " + str(score))
+            text = str(class_name + ": " + str(score))  # formatting a label for the object detection
             # printing the bounding box, class name and score
             (w_text, h_text), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_PLAIN, 1.5, 1)
             cv2.rectangle(frame, (int(x1), int(y1 - 25)), (int(x1+w_text), int(y1)), (200, 0, 0), -1)
@@ -55,8 +49,8 @@ while True:
     # Displaying the frame
     cv2.putText(frame, "Object Detection Only (YOLOv5)", (5, 30), cv2.FONT_HERSHEY_PLAIN, 2, (200, 0, 0), 2)
     cv2.imshow("Frame", frame)
-    key = cv2.waitKey(0)
-    if key & 0xff == 27:
+    key = cv2.waitKey(1)
+    if key & 0xff == 27:        # press the 'Esc' to stop the video
         break
 
 cap.release()
