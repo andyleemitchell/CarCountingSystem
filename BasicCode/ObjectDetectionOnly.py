@@ -50,7 +50,7 @@ while True:
     cv2.putText(frame, "Object Detection Only (YOLOv5)", (5, 30), cv2.FONT_HERSHEY_PLAIN, 2, (200, 0, 0), 2)
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1)
-    if key & 0xff == 27:        # press the 'Esc' to stop the video
+    if key & 0xff == 27:        # press the 'Esc' key to stop the video
         break
 
 cap.release()
