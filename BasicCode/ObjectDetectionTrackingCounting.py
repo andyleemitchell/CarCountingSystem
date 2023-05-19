@@ -1,7 +1,7 @@
 import torch
 import cv2
 import numpy as np
-from LineCounter import Point, LineZone, LineZoneAnnotator
+from lib.line_counter import Point, LineZone, LineZoneAnnotator
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 # load YOLOv5 model
