@@ -1,0 +1,15 @@
+{
+    "carpark": [
+        {
+            "id": 1,
+            "name": "Car Park 1",
+            "available_spaces": 112
+        },
+        {
+            "id": 2,
+            "name": "Car Park 2",
+            "available_spaces": 106
+        }
+    ],
+    "date": "2023-05-04T14:40:57.446873"
+}
