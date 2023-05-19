@@ -35,7 +35,7 @@ while True:
         class_name = CLASS_NAMES[class_id]
         
         # checking is the object detection is an object of interest
-        if class_name in allowed_objects:
+        if class_name in ALLOWED_OBJECTS:
             (x1, y1, x2, y2) = box
             detectionsList.append(([x1, y1, x2 - x1, y2 - y1], score, CLASS_NAMES[class_id]))
 
