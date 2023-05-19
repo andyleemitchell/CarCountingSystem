@@ -1,4 +1,3 @@
-# from time import sleep
 import torch
 import cv2
 import numpy as np
@@ -6,13 +5,9 @@ from lib.line_counter import Point, LineZone, LineZoneAnnotator
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
 # supervision imports
-# from supervision.draw.color import ColorPalette
-# from supervision.geometry.core import Point
 from supervision.video import VideoInfo
 from supervision.video import get_video_frames_generator
 from supervision.video import VideoSink
-# from supervision.detection.core import Detections, BoxAnnotator
-# from supervision.detection.line_counter import LineZone, LineZoneAnnotator
 
 import argparse
 import subprocess
@@ -20,9 +15,6 @@ import datetime
 import time
 import csv
 import json
-
-# change to laptop or nano depending on test device
-# DEVICE = 'laptop'
 
 # change depending on carpark (may change this to an argument)
 CARPARK_ID = 2
@@ -49,13 +41,12 @@ DEVICE = args.device
 
 # ----------------------------------------------------------
 
-# load model and set up allowed classes
+# load YOLOv5 model and set up allowed classes
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-# model = torch.hub.load('ultralytics/yolov5', 'custom', 'yolov5s.onnx')
 CLASS_NAMES = model.model.names
 ALLOWED_OBJECTS = ["car", "motorcycle", "bus", "truck"]
 
-# initialise tracker
+# initialise the DeepSORT object tracker
 object_tracker = DeepSort(
     max_age=12,
     n_init=2,
@@ -73,9 +64,9 @@ object_tracker = DeepSort(
     today=None
 )
 
+# obtaining input video and setting up name for output video
 INPUT_VIDEO = args.filename
 OUTPUT_VIDEO = args.out_folder + '/OUTPUT-' + DEVICE + '-' +  datetime.datetime.now().strftime("%d-%m-%Y-%H-%M-") + INPUT_VIDEO.replace('/','-')
-# OUTPUT_VIDEO = 'OUTPUT_'+INPUT_VIDEO
 
 print(OUTPUT_VIDEO)
 
@@ -86,15 +77,13 @@ generator = get_video_frames_generator(INPUT_VIDEO)
 # Defining counting line
 lineStart = Point(args.line[0], args.line[1])
 lineEnd = Point(args.line[2], args.line[3])
-# lineStart = Point(1920, 400)
-# lineEnd = Point(0, 400)
+
 # Creating a line counting object
 lineCounter = LineZone(start=lineStart, end=lineEnd)
 drawLine = LineZoneAnnotator(thickness=2, text_thickness=2, text_scale=1)
 
 # filename = args.filename + '.mp4'
 # Loading Video File
-# cap = cv2.VideoCapture("output.mp4")
 cap = cv2.VideoCapture(INPUT_VIDEO)
 
 i = 1
@@ -103,6 +92,7 @@ time_list = []
 fps_list = []
 # power_list = []
 
+# if true a video is output
 if (args.video):
     with VideoSink(OUTPUT_VIDEO, video_info=video_info) as sink:
         while True:
@@ -157,8 +147,6 @@ if (args.video):
             key = cv2.waitKey(1)
             if key & 0xff == 27:
                 break
-            # print(".", end=' ')
-            # print(video_info.total_frames)
 
             frame_time = time.time() - start_time
             frame_fps = 1/frame_time
@@ -172,7 +160,7 @@ if (args.video):
             print("%0.2f%%" % (100*i/video_info.total_frames), end=' ')
             i = i + 1
 
-            # i like being able to see the in and out count
+            # printing the in and out counts
             print("in: %d \t out %d" % (lineCounter.in_count, lineCounter.out_count), end='\r')
             sink.write_frame(frame=frame)
             
@@ -256,6 +244,8 @@ else:
         fps_list.append(frame_fps)
         # power_list.append(power)
 
+        
+# handling the data from the car counting       
 data = {
         "id": CARPARK_ID,
         "name": CARPARK_NAME,
