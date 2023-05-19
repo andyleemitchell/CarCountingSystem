@@ -4,20 +4,17 @@ import numpy as np
 from LineCounter import Point, LineZone, LineZoneAnnotator
 from deep_sort_realtime.deepsort_tracker import DeepSort
 
-# Obtaining a list of the YOLOv5 classes from txt file
-class_path = "YOLOv5Classes.txt"
-classes = []
-with open(class_path, "r") as file:
-    for class_name in file.readlines():
-        class_name = class_name.strip()
-        classes.append(class_name)
-
-# Vehicle objects to count
-allowed_objects = ["car", "motorcycle", "bus", "truck"]
-
-# YOLOv5 Model
+# load YOLOv5 model
 model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-#model = torch.hub.load(r'C:\Users\ultro\.cache\torch\hub\ultralytics_yolov5_master', 'yolov5s', source='local')
+
+# getting a list of the objects that YOLO can detect
+CLASS_NAMES = model.model.names
+
+# creating an array of objects of interest used to filter object detections
+ALLOWED_OBJECTS = ["car", "motorcycle", "bus", "truck"]
+
+# Loading Video File - Insert path location to Video File
+cap = cv2.VideoCapture("TestVideo3_Recorded.mp4")
 
 # DeepSort Tracker
 object_tracker = DeepSort(max_age=15)
@@ -29,7 +26,7 @@ lineEnd = Point(10, 450)
 lineCounter = LineZone(start=lineStart, end=lineEnd)
 drawLine = LineZoneAnnotator(thickness=2, text_thickness=2, text_scale=1)
 
-# Loading Video File
+# Loading Video File - Insert path location to Video File
 cap = cv2.VideoCapture("TestVideo3_Recorded.mp4")
 
 while True:
@@ -50,10 +47,10 @@ while True:
     # Filtering detections
     detectionsList = []  # list of allowed detected objects in the form ([x,y,w,h], score, class)
     for (class_id, score, box) in zip(class_ids, confidence, boxes):
-        class_name = classes[class_id]
-        if class_name in allowed_objects:
+        class_name = CLASS_NAMES[class_id]
+        if class_name in ALLOWED_OBJECTS:
             (x1, y1, x2, y2) = box
-            detectionsList.append(([x1, y1, x2 - x1, y2 - y1], score, classes[class_id]))
+            detectionsList.append(([x1, y1, x2 - x1, y2 - y1], score, CLASS_NAMES[class_id]))
 
     # Updating the DeepSort Object tracker
     tracks = object_tracker.update_tracks(detectionsList, frame=frame)
@@ -82,8 +79,8 @@ while True:
     # Displaying the frame
     drawLine.annotate(frame=frame, line_counter=lineCounter)
     cv2.imshow("Frame", frame)
-    key = cv2.waitKey(0)
-    if key & 0xff == 27:
+    key = cv2.waitKey(1)
+    if key & 0xff == 27:    # press the 'Esc' key to stop the video
         break
 
 cap.release()
