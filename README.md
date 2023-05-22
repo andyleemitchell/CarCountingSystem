@@ -28,4 +28,4 @@ This should (hopefully!) run the car counting on the video, and produce an outpu
 # Website
 You can access an example of our website at the following link:
 
-[https://ee399website.sarahb22.repl.co/contactpage.html](https://ee399website.sarahb22.repl.co/contactpage.html)
+[https://ee399website.sarahb22.repl.co/index.html](https://ee399website.sarahb22.repl.co/index.html)
